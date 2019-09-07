@@ -10,10 +10,10 @@ let sequence = 0;
 router.post('/', checkAuth, (request, response) => {
   const newOrder = {
     id: ++sequence,
-    requestDate: request.body.requestDate,
+    requestDate: new Date(),
     cliente: request.body.cliente,
     products: request.body.products,
-    status: request.body.status
+    status: "NOVO"
   };
 
   db[newOrder.id] = newOrder;
@@ -37,6 +37,7 @@ router.get('/:orderId', (request, response) => {
 });
 
 router.patch('/:orderId', checkAuth, (request, response) => {
+  console.log(request);
   const order = db[request.params.orderId];
   if(order) {
     order.requestDate = request.body.requestDate || order.requestDate;

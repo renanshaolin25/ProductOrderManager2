@@ -8,20 +8,23 @@ let db = {};
 let sequence = 0;
 
 router.post('/', checkAuth, (request, response) => {
-  const newDelivery = {
-    id: ++sequence,
-    order: request.body.order,
-    client: request.body.client,
-    receiverName: request.body.receiverName,
-    receiverDoc: request.body.receiverDoc,
-    receiverIsClient: request.body.receiverIsClient,
-    deliveryDateTime: request.body.deliveryDateTime,
-    latLong: request.body.latLong
-  };
-
-  db[newDelivery.id] = newDelivery;
-
-  response.status(201).json(newDelivery);
+  if(request.body.order.status !== "DESPACHADO"){
+    response.status(500).json("Favor alterar o status do pedido para 'Despachado'!");
+  }else{
+    const newDelivery = {
+      id: ++sequence,
+      order: request.body.order,
+      receiverName: request.body.receiverName,
+      receiverDoc: request.body.receiverDoc,
+      receiverIsClient: request.body.receiverIsClient,
+      deliveryDateTime: new Date(),
+      latLong: request.body.latLong
+    };
+  
+    db[newDelivery.id] = newDelivery;
+  
+    response.status(201).json(newDelivery);
+  }
 });
 
 router.get('/', (request, response) => {
@@ -32,33 +35,32 @@ router.get('/', (request, response) => {
     : response.status(204).end();
 });
 
-router.get('/:taskId', (request, response) => {
-  const task = db[request.params.taskId];
-  task
-    ? response.json(task)
+router.get('/:deliveryId', (request, response) => {
+  const delivery = db[request.params.deliveryId];
+  delivery
+    ? response.json(delivery)
     : notFound(request, response);
 });
 
-router.patch('/:taskId', checkAuth, (request, response) => {
-  const task = db[request.params.taskId];
-  if(task) {
-    task.order = request.body.order || task.order;
-    task.client = request.body.client || task.client;
-    task.receiverName = request.body.receiverName || task.receiverName;
-    task.receiverDoc = request.body.receiverDoc || task.receiverDoc;
-    task.receiverIsClient = request.body.receiverIsClient || task.receiverIsClient;
-    task.deliveryDateTime = request.body.deliveryDateTime || task.deliveryDateTime;
-    task.latLong = request.body.latLong || task.latLong;
-    response.json(task);
+router.patch('/:deliveryId', checkAuth, (request, response) => {
+  const delivery = db[request.params.deliveryId];
+  if(delivery) {
+    delivery.order = request.body.order || delivery.order;
+    delivery.receiverName = request.body.receiverName || delivery.receiverName;
+    delivery.receiverDoc = request.body.receiverDoc || delivery.receiverDoc;
+    delivery.receiverIsClient = request.body.receiverIsClient || delivery.receiverIsClient;
+    delivery.deliveryDateTime = request.body.deliveryDateTime;
+    delivery.latLong = request.body.latLong || delivery.latLong;
+    response.json(delivery);
   } else {
     notFound(request, response);
   }
 });
 
-router.delete('/:taskId', checkAuth, (request, response) => {
-  const task = db[request.params.taskId];
-  if(task) {
-    delete db[task.id];
+router.delete('/:deliveryId', checkAuth, (request, response) => {
+  const delivery = db[request.params.deliveryId];
+  if(delivery) {
+    delete db[delivery.id];
     response.status(200).end();
   } else {
     notFound(request, response);

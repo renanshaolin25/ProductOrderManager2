@@ -39,7 +39,6 @@ router.patch('/:personId', checkAuth, (request, response) => {
   if(person) {
     person.name = request.body.name || person.name;
     person.doc = request.body.doc || person.doc;
-    person.description = request.body.description || person.description;
     response.json(person);
   } else {
     notFound(request, response);
